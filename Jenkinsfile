@@ -15,15 +15,18 @@ pipeline {
         }        
         stage ('Test image') {
             steps {
-                script {
-                    sh 'docker image ls | grep python_app:latest'
-                    sh 'if [[ echo $? -e 0 ]]
+                    sh(returnStdout: true, script:
+                    '''
+                    #!/bin/bash
+                    docker image ls | grep python_app:latest
+
+                    if [[ echo $? -e 0 ]]
                         then 
                             echo "Test passed"
                         else 
                             echo "Test failed, image do not exist"
-                        fi' 
-                }
+                    fi
+                    '''.stripIndent())
             }
         }
         stage('Publish') {
