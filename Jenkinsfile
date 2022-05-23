@@ -40,7 +40,7 @@ pipeline {
                 sh 'docker push norbert00/python_app:latest'
             }
         }
-    }
+    
     post {
         cleanup {
             script {
