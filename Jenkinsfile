@@ -1,10 +1,12 @@
 pipeline {
-    
+
+
     agent any
-    
+
     environment {
 		DOCKERHUB_CREDENTIALS=credentials('norbert00-dockerhub')
 	}
+
 
     stages {
         stage('Checkout') {
@@ -12,7 +14,7 @@ pipeline {
                 git branch: 'lesson2', url: 'https://github.com/Norbert00/jenkins-docker'
             }
         }
-        
+
 
         stage('Build docker image') {
             steps {
@@ -29,27 +31,37 @@ pipeline {
                     '''
                     #!/bin/bash
                     docker image inspect python_app:latest >/dev/null 2>&1 && echo yes || echo no
-
                     '''.stripIndent())
             }
         }
 
 
-        stage('Login to dockerhub repo') {
+        stage('Login dockerhub repo') {
             steps {
-                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                }
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
             }
+        }
 
-
-
-        stage('Push docker image to dockerhub repo')
+        stage ('Push docker image to dockerhub') {
             steps {
                 sh 'docker push norbert00/python_app:latest'
             }
         }
 
-        
+
+        // stage('Publish') {
+        //     steps {
+        //         script {
+        //             docker.withRegistry('https://registry.hub.docker.com', 'norbert00-dockerhub') {
+        //                 appImage.push("${env.BUILD_NUMBER}")
+        //                 app.push("latest")
+        //             }
+        //         }
+        //     }
+        // }
+    }
+
+
     post {
         cleanup {
             script {
