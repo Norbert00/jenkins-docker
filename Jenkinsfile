@@ -19,7 +19,7 @@ pipeline {
         stage('Build docker image') {
             steps {
                 script {
-                    appImage = docker.build('python_app:latest', '--build-arg SERVER_PORT=9000 .')
+                    appImage = docker.build('norbert00/python_app:latest', '--build-arg SERVER_PORT=9000 .')
                 }
             }
         }      
@@ -30,7 +30,7 @@ pipeline {
                     sh(returnStdout: true, script:
                     '''
                     #!/bin/bash
-                    docker image inspect python_app:latest >/dev/null 2>&1 && echo yes || echo no
+                    docker image inspect norbert00/python_app:latest >/dev/null 2>&1 && echo yes || echo no
                     '''.stripIndent())
             }
         }
