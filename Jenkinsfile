@@ -1,5 +1,11 @@
 pipeline {
+    
     agent any
+    
+    environment {
+		DOCKERHUB_CREDENTIALS=credentials('norbert00-dockerhub')
+	}
+
     stages {
         stage('Checkout') {
             steps {
@@ -23,14 +29,15 @@ pipeline {
                     '''.stripIndent())
             }
         }
-        stage('Publish') {
+        stage('Login to dockerhub repo') {
             steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'norbert00-dockerhub') {
-                        appImage.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
-                    }
+                    sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
                 }
+            }
+
+        stage('Push docker image to dockerhub repo')
+            steps {
+                sh 'docker push norbert00/python_app:latest'
             }
         }
     }
