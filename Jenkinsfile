@@ -18,14 +18,8 @@ pipeline {
                     sh(returnStdout: true, script:
                     '''
                     #!/bin/bash
-                    docker image ls | grep python_app:latest
+                    docker image inspect python_app:latest >/dev/null 2>&1 && echo yes || echo no
 
-                    if [[ echo $? -e 0 ]]
-                        then 
-                            echo "Test passed"
-                        else 
-                            echo "Test failed, image do not exist"
-                    fi
                     '''.stripIndent())
             }
         }
