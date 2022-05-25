@@ -5,13 +5,16 @@ pipeline {
 
     environment {
 		DOCKERHUB_CREDENTIALS=credentials('norbert00-dockerhub')
+        GITHUB_REPO = "https://github.com/Norbert00/jenkins-docker"
+        REGISTRY = "norbert00/python_app"
+        DOCKER_IMAGE = ""
 	}
 
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'lesson2', url: 'https://github.com/Norbert00/jenkins-docker'
+                git branch: 'lesson2', url: GITHUB_REPO
             }
         }
 
@@ -19,7 +22,7 @@ pipeline {
         stage('Build docker image') {
             steps {
                 script {
-                    appImage = docker.build('norbert00/python_app:latest', '--build-arg SERVER_PORT=9000 .')
+                    DOCKER_IMAGE = docker.build REGISTRY + ":${BUILD_NUMBER}"
                 }
             }
         }      
@@ -30,7 +33,7 @@ pipeline {
                     sh(returnStdout: true, script:
                     '''
                     #!/bin/bash
-                    docker image inspect norbert00/python_app:latest >/dev/null 2>&1 && echo yes || echo no
+                    docker image inspect ${DOCKER_IMAGE} >/dev/null 2>&1 && echo yes || echo no
                     '''.stripIndent())
             }
         }
@@ -44,7 +47,7 @@ pipeline {
 
         stage ('Push docker image to dockerhub') {
             steps {
-                sh 'docker push norbert00/python_app:latest'
+                sh 'docker push ${REGISTRY}:${BUILD_NUMBER}'
             }
         }
 
@@ -66,7 +69,7 @@ pipeline {
         cleanup {
             script {
                 cleanWs()
-                sh "docker image rm ${appImage.id}"
+                sh "docker image rm ${REGISTRY}:${BUILD_NUMBER}"
             }
         }
     }
